@@ -1,12 +1,18 @@
 SOURCES = \
     main.py \
     mainwindow.py \
+    converter.py \
     filenameeditdialog.py \
     highlighter.py \
     archive/container.py \
     archive/exceptions.py \
     archive/file.py \
+    extensions/ruby.py \
+    extensions/scenario_paragraph.py \
+    extensions/text_span.py \
+    extensions/word_link.py \
     models/project.py \
+    models/structure.py \
     widgets/plaintextedit.py
 
 FORMS = \

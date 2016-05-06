@@ -65,6 +65,12 @@ class Scenario(ContainerBase):
         """
         self.filepath = filepath
 
+    def text(self):
+        """
+        :rtype: str
+        """
+        return self.content.decode(DEFAULT_ENCODING, "ignore")
+
     def setText(self, text):
         """
         :type archive: str

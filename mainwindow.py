@@ -4,6 +4,8 @@ from __future__ import division
 
 import os
 
+from lxml import etree
+
 import qt
 from qt import pyqtSlot, pyqtSignal
 from qt import Qt
@@ -19,7 +21,9 @@ from archive.container import ContainerBase
 from archive.container import Scenario
 from models.project import ProjectTreeModel
 from models.project import FileItem
+from models.structure import StructureListModel
 from highlighter import ScenarioHighlighter
+import converter
 
 from ui.mainwindow import Ui_MainWindow
 
@@ -66,6 +70,10 @@ class MainWindow(QMainWindow):
 
         self.scenarioSelection.currentRowChanged.connect(self.scenarioSelection_currentRowChanged, Qt.QueuedConnection)
         self.structureSelection.currentRowChanged.connect(self.structureSelection_currentRowChanged)
+
+        self.structureModel = StructureListModel(self)
+
+        self.ui.listViewStructure.setModel(self.structureModel)
 
         self.setProject(ProjectFile.create())
 
@@ -175,7 +183,7 @@ class MainWindow(QMainWindow):
             if not filepath:
                 return
             filepath = self.hestiaArchiveName(filepath)
-        self.project.save(filepath)
+        self.save(filepath)
 
     @pyqtSlot()
     def on_actionSaveAs_triggered(self):
@@ -268,6 +276,15 @@ class MainWindow(QMainWindow):
     def structureSelection_currentRowChanged(self, current, previous):
         if not current.isValid():
             return
+        currentItem = current.internalPointer()
+        previousItem = previous.internalPointer()
+        if not isinstance(currentItem, FileItem):
+            return
+        currentItem = current.internalPointer()
+        text = currentItem.object.text()
+        xhtml = converter.toXHTML(text)
+        root = etree.fromstring(xhtml)
+        self.structureModel.setRoot(root)
 
     @pyqtSlot(QModelIndex)
     def scenarioRestored(self, index):
