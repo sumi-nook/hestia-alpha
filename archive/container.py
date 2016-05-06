@@ -15,7 +15,7 @@ DEFAULT_ENCODING = "utf-8"
 
 class ContainerBase(QObject):
 
-    changed = pyqtSignal()
+    changed = pyqtSignal(object)
 
     def __init__(self, parent=None):
         """
@@ -71,7 +71,7 @@ class Scenario(ContainerBase):
         """
         assert(isinstance(text, six.text_type))
         self.content = text.encode(DEFAULT_ENCODING)
-        self.changed.emit()
+        self.changed.emit(self)
 
     @staticmethod
     def create():

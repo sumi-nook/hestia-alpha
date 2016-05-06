@@ -15,6 +15,7 @@ from qt import QMessageBox
 from qt import QItemSelectionModel
 
 from archive.file import ProjectFile
+from archive.container import ContainerBase
 from archive.container import Scenario
 from models.project import ProjectTreeModel
 from models.project import FileItem
@@ -71,7 +72,7 @@ class MainWindow(QMainWindow):
         self.initializeScenario()
 
     def initializeScenario(self):
-        self.currentScenario = Scenario.create()
+        self.setCurrentScenario(Scenario.create())
         self.ui.textEditScenario.clear()
         self.scenarioSelection.setCurrentIndex(QModelIndex(), QItemSelectionModel.Clear)
 
@@ -98,9 +99,15 @@ class MainWindow(QMainWindow):
     def setProject(self, project):
         self.project = project
         self.project.changed.connect(self.projectChanged)
-        self.project.updated.connect(self.projectModel.projectUpdate)
+        self.project.changed.connect(self.projectModel.projectUpdate)
         self.projectModel.setProject(self.project)
         self.projectModel.projectUpdate()
+
+    def setCurrentScenario(self, scenario):
+        self.currentScenario = scenario
+        filepath = self.currentScenario.filePath()
+        if not filepath:
+            self.setWindowTitle(self.tr("Hestia [*]"))
 
     def getOpenFileName(self, caption, path, filter):
         """
@@ -134,9 +141,13 @@ class MainWindow(QMainWindow):
                 event.ignore()
                 return
 
-    @pyqtSlot()
-    def projectChanged(self):
+    @pyqtSlot(object)
+    def projectChanged(self, container):
         self.setWindowModified(True)
+        if container:
+            filepath = container.filePath()
+            self.setWindowTitle(self.tr("%1 - Hestia [*]").arg(filepath))
+
 
     @pyqtSlot()
     def projectModel_projectUpdated(self):
@@ -219,11 +230,12 @@ class MainWindow(QMainWindow):
             filename += DEFAULT_EXT
         # set content
         content = qt.toUnicode(self.ui.textEditScenario.toPlainText())
-        self.currentScenario = Scenario.create()
-        self.currentScenario.setText(content)
+        scenario = Scenario.create()
+        scenario.setText(content)
         # set filepath & register
-        self.currentScenario.setFilePath(filename)
-        self.project.append(self.currentScenario)
+        scenario.setFilePath(filename)
+        self.project.append(scenario)
+        self.setCurrentScenario(scenario)
 
     @pyqtSlot(QModelIndex, QModelIndex)
     def scenarioSelection_currentRowChanged(self, current, previous):
@@ -247,8 +259,10 @@ class MainWindow(QMainWindow):
                 return
             elif ret == QMessageBox.Save:
                 self.currentScenario.setText(qt.toUnicode(self.ui.textEditScenario.toPlainText()))
-        self.currentScenario = currentItem.object
+        self.setCurrentScenario(currentItem.object)
         self.ui.textEditScenario.setScenario(self.currentScenario)
+        filepath = self.currentScenario.filePath()
+        self.setWindowTitle(self.tr("%1 - Hestia [*]").arg(filepath))
 
     @pyqtSlot(QModelIndex, QModelIndex)
     def structureSelection_currentRowChanged(self, current, previous):

@@ -13,14 +13,16 @@ import zipfile
 from qt import pyqtSignal, pyqtSlot
 from qt import QObject
 
-from . import container
+from .container import parse as container_parse
+from .container import ContainerBase
+from .container import Scenario
 from .exceptions import ArchiveException
 
 
 class ProjectFile(QObject):
 
-    updated = pyqtSignal()
-    changed = pyqtSignal()
+    # archive content changed
+    changed = pyqtSignal(object)
 
     def __init__(self, fp):
         """
@@ -29,22 +31,20 @@ class ProjectFile(QObject):
         super(ProjectFile, self).__init__()
         self.filepath = None
         self.fp = fp
-        self.containers = container.parse(self.fp)
+        self.containers = container_parse(self.fp)
         self.saved = True
 
     def append(self, container):
         assert(container not in self.containers)
         self.containers.append(container)
         container.changed.connect(self.containerChanged)
-        self.updated.emit()
-        self.changed.emit()
+        self.changed.emit(container)
 
     def filePath(self):
         return self.filepath
 
     def setFilePath(self, filepath):
         self.filepath = filepath
-        self.changed.emit()
 
     def isChanged(self):
         return not self.saved
@@ -59,10 +59,10 @@ class ProjectFile(QObject):
         shutil.copyfile(fp.name, self.filepath)
         self.saved = True
 
-    @pyqtSlot()
-    def containerChanged(self):
+    @pyqtSlot(object)
+    def containerChanged(self, container):
         self.saved = False
-        self.changed.emit()
+        self.changed.emit(container)
 
     @staticmethod
     def create():
