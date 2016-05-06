@@ -31,7 +31,7 @@
            <enum>Qt::Horizontal</enum>
           </property>
           <widget class="QTreeView" name="treeViewScenario"/>
-          <widget class="QTextEdit" name="textEditScenario"/>
+          <widget class="PlainTextEdit" name="textEditScenario"/>
          </widget>
         </item>
        </layout>
@@ -134,6 +134,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlainTextEdit</class>
+   <extends>QTextEdit</extends>
+   <header>widgets/plaintextedit</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources.qrc"/>
  </resources>

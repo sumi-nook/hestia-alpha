@@ -6,7 +6,8 @@ SOURCES = \
     archive/container.py \
     archive/exceptions.py \
     archive/file.py \
-    models/project.py
+    models/project.py \
+    widgets/plaintextedit.py
 
 FORMS = \
     ui/mainwindow.ui \
