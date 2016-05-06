@@ -9,7 +9,7 @@
 
 ## エンコーディング
 
-シナリオファイルのテキストエンコーディングは[UTF-8]です。
+シナリオファイルのテキストエンコーディングは[UTF-8]を使用しなければなりません。
 
 ## Markdown
 
@@ -93,5 +93,5 @@ XHTML:
 ```
 
 
-[UTF-8]: https://tools.ietf.org/html/rfc3629　"RFC3629 - UTF-8, a transformation format of ISO 10646"
+[UTF-8]: https://tools.ietf.org/html/rfc3629 "RFC3629 - UTF-8, a transformation format of ISO 10646"
 [Markdown]: http://daringfireball.net/projects/markdown/
