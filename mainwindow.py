@@ -6,10 +6,13 @@ import os
 
 import qt
 from qt import pyqtSlot, pyqtSignal
+from qt import Qt
 from qt import QModelIndex
 from qt import QMainWindow
 from qt import QDialog
 from qt import QFileDialog
+from qt import QMessageBox
+from qt import QItemSelectionModel
 
 from archive.file import ProjectFile
 from archive.container import Scenario
@@ -27,6 +30,9 @@ HESTIA_EXT = ".hax"
 
 
 class MainWindow(QMainWindow):
+
+    scenarioRestore = pyqtSignal(QModelIndex)
+
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.ui = Ui_MainWindow()
@@ -42,11 +48,12 @@ class MainWindow(QMainWindow):
 
         self.highlighter = ScenarioHighlighter(self.ui.textEditScenario.document())
 
+        self.scenarioRestore.connect(self.scenarioRestored)
+
         self.initialize()
 
     def initialize(self):
         self.project = ProjectFile.create()
-        self.initializeScenario()
 
         self.projectModel = ProjectTreeModel(self)
         self.projectModel.projectUpdated.connect(self.projectModel_projectUpdated)
@@ -56,20 +63,42 @@ class MainWindow(QMainWindow):
         self.scenarioSelection = self.ui.treeViewScenario.selectionModel()
         self.structureSelection = self.ui.treeViewStructure.selectionModel()
 
-        self.scenarioSelection.currentRowChanged.connect(self.scenarioSelection_currentRowChanged)
+        self.scenarioSelection.currentRowChanged.connect(self.scenarioSelection_currentRowChanged, Qt.QueuedConnection)
         self.structureSelection.currentRowChanged.connect(self.structureSelection_currentRowChanged)
 
-        self.projectModel.setProject(self.project)
+        self.setProject(ProjectFile.create())
+
+        self.initializeScenario()
 
     def initializeScenario(self):
         self.currentScenario = Scenario.create()
         self.ui.textEditScenario.clear()
+        self.scenarioSelection.setCurrentIndex(QModelIndex(), QItemSelectionModel.Clear)
+
+    def currentIsChanged(self):
+        text = qt.toUnicode(self.ui.textEditScenario.toPlainText())
+        return not self.currentScenario.isSame(text)
 
     def open(self, filepath):
         """
         :type filepath: str
         """
-        self.project = ProjectFile.open(filepath)
+        self.setProject(ProjectFile.open(filepath))
+
+    def save(self, filepath):
+        """
+        :type filepath: str
+        """
+        assert(bool(filepath))
+        filepath = self.hestiaArchiveName(filepath)
+        self.project.setFilePath(filepath)
+        self.project.save()
+        self.setWindowModified(False)
+
+    def setProject(self, project):
+        self.project = project
+        self.project.changed.connect(self.projectChanged)
+        self.project.updated.connect(self.projectModel.projectUpdate)
         self.projectModel.setProject(self.project)
         self.projectModel.projectUpdate()
 
@@ -86,10 +115,28 @@ class MainWindow(QMainWindow):
         return qt.toUnicode(QFileDialog.getSaveFileName(self, caption, path, filter))
 
     def hestiaArchiveName(self, filepath):
+        """
+        :type filepath: str
+        :rtype: str
+        """
         root, ext = os.path.splitext(filepath)
         if ext != HESTIA_EXT:
             return root + HESTIA_EXT
         return filepath
+
+    def closeEvent(self, event):
+        if self.project.isChanged():
+            ret = QMessageBox.warning(self,
+                    self.tr("Project changed"),
+                    self.tr("Do you want to continue?"),
+                    QMessageBox.Cancel | QMessageBox.Discard)
+            if ret == QMessageBox.Cancel:
+                event.ignore()
+                return
+
+    @pyqtSlot()
+    def projectChanged(self):
+        self.setWindowModified(True)
 
     @pyqtSlot()
     def projectModel_projectUpdated(self):
@@ -111,31 +158,39 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_actionSave_triggered(self):
-        if self.project.filepath is None:
+        filepath = self.project.filePath()
+        if not filepath:
             filepath = self.getSaveFileName(self.tr(""), self.tr(""), self.HESTIA_ARCHIVE_FILTER)
             if not filepath:
                 return
             filepath = self.hestiaArchiveName(filepath)
-            self.project.setFilePath(filepath)
-        self.project.save()
+        self.project.save(filepath)
 
     @pyqtSlot()
     def on_actionSaveAs_triggered(self):
         filepath = self.getSaveFileName(self.tr(""), self.tr(""), self.HESTIA_ARCHIVE_FILTER)
         if not filepath:
             return
-        filepath = self.hestiaArchiveName(filepath)
-        self.project.setFilePath(filepath)
-        self.project.save()
+        self.save(filepath)
 
     @pyqtSlot()
     def on_actionScenarioNew_triggered(self):
+        if self.currentIsChanged():
+            ret = QMessageBox.warning(self,
+                self.tr("Text changed"),
+                self.tr("Do you want to save it?"),
+                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+            if ret == QMessageBox.Cancel:
+                return
+            elif ret == QMessageBox.Save:
+                content = qt.toUnicode(self.ui.textEditScenario.toPlainText())
+                self.currentScenario.setText(content)
         self.initializeScenario()
     
     @pyqtSlot()
     def on_actionScenarioSave_triggered(self):
-        filename = None
-        if self.currentScenario.filepath is None:
+        filename = self.currentScenario.filePath()
+        if not filename:
             dialog = FileNameEditDialog(self)
             if dialog.exec_() != QDialog.Accepted:
                 return
@@ -145,15 +200,13 @@ class MainWindow(QMainWindow):
                 filename += DEFAULT_EXT
         # set content
         content = qt.toUnicode(self.ui.textEditScenario.toPlainText())
-        content = content.encode("utf-8")
-        self.currentScenario.content = content
-        if self.currentScenario.filepath is not None:
+        self.currentScenario.setText(content)
+        if self.currentScenario.filePath():
             # filename is already set
             return
         # set filepath & register
-        self.currentScenario.filepath = filename
+        self.currentScenario.setFilePath(filename)
         self.project.append(self.currentScenario)
-        self.projectModel.projectUpdate()
 
     @pyqtSlot()
     def on_actionScenarioSaveAs_triggered(self):
@@ -166,25 +219,42 @@ class MainWindow(QMainWindow):
             filename += DEFAULT_EXT
         # set content
         content = qt.toUnicode(self.ui.textEditScenario.toPlainText())
-        content = content.encode("utf-8")
         self.currentScenario = Scenario.create()
-        self.currentScenario.content = content
+        self.currentScenario.setText(content)
         # set filepath & register
-        self.currentScenario.filepath = filename
+        self.currentScenario.setFilePath(filename)
         self.project.append(self.currentScenario)
-        self.projectModel.projectUpdate()
 
     @pyqtSlot(QModelIndex, QModelIndex)
     def scenarioSelection_currentRowChanged(self, current, previous):
         if not current.isValid():
             return
-        item = current.internalPointer()
-        if not isinstance(item, FileItem):
+        currentItem = current.internalPointer()
+        previousItem = previous.internalPointer()
+        if not isinstance(currentItem, FileItem):
             return
-        self.currentScenario = item.object
+        if currentItem == previousItem:
+            return
+        if currentItem.object == self.currentScenario:
+            return
+        if self.currentIsChanged():
+            ret = QMessageBox.information(self,
+                    self.tr("Text Changed"),
+                    self.tr("Do you want to save it?"),
+                    QMessageBox.Save | QMessageBox.Cancel | QMessageBox.Discard)
+            if ret == QMessageBox.Cancel:
+                self.scenarioRestore.emit(previous)
+                return
+            elif ret == QMessageBox.Save:
+                self.currentScenario.setText(qt.toUnicode(self.ui.textEditScenario.toPlainText()))
+        self.currentScenario = currentItem.object
         self.ui.textEditScenario.setScenario(self.currentScenario)
 
     @pyqtSlot(QModelIndex, QModelIndex)
     def structureSelection_currentRowChanged(self, current, previous):
         if not current.isValid():
             return
+
+    @pyqtSlot(QModelIndex)
+    def scenarioRestored(self, index):
+        self.ui.treeViewScenario.setCurrentIndex(index)

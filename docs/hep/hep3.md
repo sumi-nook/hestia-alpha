@@ -7,6 +7,10 @@
 
 シナリオファイルは内部でXHTML形式に変換され、構造データを構築します。
 
+## エンコーディング
+
+シナリオファイルのテキストエンコーディングは[UTF-8]です。
+
 ## Markdown
 
 MarkdownはJohn Gruber氏によって提案された書式です。 \[[Markdown]]
@@ -89,4 +93,5 @@ XHTML:
 ```
 
 
+[UTF-8]: https://tools.ietf.org/html/rfc3629　"RFC3629 - UTF-8, a transformation format of ISO 10646"
 [Markdown]: http://daringfireball.net/projects/markdown/

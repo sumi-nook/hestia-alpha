@@ -4,7 +4,25 @@ from __future__ import unicode_literals
 
 import os
 
-class ContainerBase(object):
+import six
+
+from qt import pyqtSignal
+from qt import QObject
+
+
+DEFAULT_ENCODING = "utf-8"
+
+
+class ContainerBase(QObject):
+
+    changed = pyqtSignal()
+
+    def __init__(self, parent=None):
+        """
+        :type parent: QObject
+        """
+        super(ContainerBase, self).__init__(parent)
+
     def archive(self, archive):
         """
         :type archive: zipfile.ZipFile
@@ -14,6 +32,11 @@ class ContainerBase(object):
 
 class Scenario(ContainerBase):
     def __init__(self, filepath, content):
+        """
+        :type filepath: str
+        :type content: bytes
+        """
+        super(Scenario, self).__init__()
         self.filepath = filepath
         self.content = content
 
@@ -24,8 +47,37 @@ class Scenario(ContainerBase):
         assert(self.filepath is not None)
         archive.writestr(self.filepath, self.content)
 
+    def isSame(self, text):
+        """
+        :rtype: bool
+        """
+        return self.content == text.encode(DEFAULT_ENCODING)
+
+    def filePath(self):
+        """
+        :rtype: str
+        """
+        return self.filepath
+
+    def setFilePath(self, filepath):
+        """
+        :type filepath: str
+        """
+        self.filepath = filepath
+
+    def setText(self, text):
+        """
+        :type archive: str
+        """
+        assert(isinstance(text, six.text_type))
+        self.content = text.encode(DEFAULT_ENCODING)
+        self.changed.emit()
+
     @staticmethod
     def create():
+        """
+        :rtype: Scenario
+        """
         return Scenario(None, b"")
 
 
@@ -38,6 +90,7 @@ EXT_MAP = {
 def parse(archive):
     """
     :type archive: zipfile.ZipFile
+    :rtype: list of ContainerBase
     """
     result = []
     for name in archive.namelist():
