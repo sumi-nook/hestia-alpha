@@ -36,11 +36,23 @@ class ProjectFile(object):
         fp = tempfile.NamedTemporaryFile()
         archive = zipfile.ZipFile(fp, "w")
         for container in self.containers:
-            print(container)
             container.archive(archive)
         archive.close()
         shutil.copyfile(fp.name, self.filepath)
 
     @staticmethod
     def create():
+        """
+        :rtype: ProjectFile
+        """
         return ProjectFile(zipfile.ZipFile(BytesIO(), "a"))
+
+    @staticmethod
+    def open(filepath):
+        """
+        :type filepath: str
+        :rtype: ProjectFile
+        """
+        result = ProjectFile(zipfile.ZipFile(open(filepath, "rb")))
+        result.filepath = filepath
+        return result

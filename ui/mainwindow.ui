@@ -46,8 +46,8 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QTreeView" name="treeView"/>
-          <widget class="QListView" name="listView"/>
+          <widget class="QTreeView" name="treeViewStructure"/>
+          <widget class="QListView" name="listViewStructure"/>
          </widget>
         </item>
        </layout>

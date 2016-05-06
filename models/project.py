@@ -42,9 +42,9 @@ class DirectoryItem(TreeItem):
 
 
 class FileItem(TreeItem):
-    def __init__(self, parent, name, content):
+    def __init__(self, parent, name, object):
         super(FileItem, self).__init__(parent, name)
-        self.content = content
+        self.object = object
 
 
 def make_project_tree(project):
@@ -69,7 +69,7 @@ def make_project_tree(project):
             else:
                 parent = dirs[path]
         if isinstance(container, Scenario):
-            parent.append(FileItem(parent, tail, container.content))
+            parent.append(FileItem(parent, tail, container))
     return root
 
 

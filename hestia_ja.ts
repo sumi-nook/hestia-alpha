@@ -61,7 +61,7 @@
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="mainwindow.py" line="67"/>
+        <location filename="mainwindow.py" line="35"/>
         <source>Hestia Archive(*.hax)</source>
         <translation></translation>
     </message>
