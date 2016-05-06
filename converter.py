@@ -15,6 +15,7 @@ def toXHTML(text):
         TextSpanExtension(),
         ScenarioParagraphExtension(),
         WordLinkExtension(),
+        "markdown.extensions.nl2br",
     ])
     return """<div>
 {}
