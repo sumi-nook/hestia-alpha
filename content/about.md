@@ -22,4 +22,4 @@ HestiaはHEP(Hestia改良提案)に基づいて作成されています。
 
 詳しくは [HEP-Index] を参照して下さい。
 
-[HEP-Index]: /hestia/hestia-index.html
+[HEP-Index]: /hestia/hep-index.html
