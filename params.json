@@ -1,6 +1,0 @@
-{
-  "name": "Hestia",
-  "tagline": "Hestiaはシナリオとスクリプトの中間表現を提供するシナリオシステムソフトウェアです。",
-  "body": "# Hestia\r\n\r\nHestiaはシナリオとスクリプトの中間表現を提供するシナリオシステムソフトウェアです。\r\n\r\nシナリオファイルから構造データを生成し、構造データから機械的にスクリプトを生成します。\r\nスクリプトが機械的に生成されるため、バグの混入を最小限に抑えることができます。\r\n\r\n生成された構造データに対して*表現*を挿入することにより、**従来のスクリプト方式から*シナリオ*と*表現*とを切り離すことができます。**\r\nこれがHestiaの提供する**中間表現**という考え方です。\r\n\r\n## ライセンス\r\n\r\nHestiaはGPLv3ライセンスが適用されます。\r\n\r\nHestiaを用いて生成された成果物（プロジェクトファイルやスクリプト）にGPLv3が適用されることはありません。\r\n\r\n## HEP\r\n\r\nHestiaはHEP(Hestia改良提案)に基づいて作成されています。\r\n\r\n詳しくは [docs/hep/README.md] を参照して下さい。\r\n\r\n[docs/hep/README.md]: ./docs/hep/README.md\r\n",
-  "note": "Don't delete this file! It's used internally to help with page regeneration."
-}
