@@ -35,12 +35,43 @@
 スクリプトが機械的に生成されるため、バグの混入を最小限に抑えることができます。</p>
 <p>生成された構造データに対して<em>表現</em>を挿入することにより、<strong>従来のスクリプト方式から<em>シナリオ</em>と<em>表現</em>とを切り離すことができます。</strong>
 これがHestiaの提供する<strong>中間表現</strong>という考え方です。</p>
+<h2>目標</h2>
+<p>一つのシナリオファイルから複数のゲームエンジンに対応することを目標にしています。</p>
+<p>対応予定ゲームエンジン：</p>
+<ul>
+<li>KAG3</li>
+<li>NScripter</li>
+<li>RealLiveMax</li>
+<li>CatSystem2</li>
+<li>YU-RIS</li>
+<li>Artemis</li>
+</ul>
 <h2>ライセンス</h2>
 <p>HestiaはGPLv3ライセンスが適用されます。</p>
+<p>テンプレート部分は修正BSDライセンスが適用されます。</p>
 <p>Hestiaを用いて生成された成果物（プロジェクトファイルやスクリプト）にGPLv3が適用されることはありません。</p>
 <h2>HEP</h2>
 <p>HestiaはHEP(Hestia改良提案)に基づいて作成されています。</p>
 <p>詳しくは <a href="/hestia/hep-index.html">HEP-Index</a> を参照して下さい。</p>
+<h2>環境</h2>
+<p>以下のプラットフォームに対応しています。</p>
+<ul>
+<li>Windows (Pre Release - <a href="https://github.com/sumi-nook/hestia/releases/download/v0.0.0.1/Hestia-v0.0.0.1.zip">v0.0.0.1</a> (py2exe))</li>
+<li>Mac OSX</li>
+<li>Linux</li>
+</ul>
+<p>Unix/Linux環境においては、<code>python main.py</code>を実行して下さい。</p>
+<p>以下のライブラリが必要になります。</p>
+<ul>
+<li>PyQt</li>
+<li>python-lxml</li>
+<li>python-Markdown</li>
+<li>python-six</li>
+</ul>
+<p><code>python main.py</code>実行前に、以下のコマンドを実行する必要があります。</p>
+<div class="highlight"><pre><span class="p">.</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">rcc</span>
+<span class="p">.</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">uic</span>
+</pre></div>
       </article>
 
       <hr />
