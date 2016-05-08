@@ -11,6 +11,7 @@ TIMEZONE = 'Asia/Tokyo'
 DEFAULT_LANG = u'ja'
 
 THEME = './pelican-sober'
+GOOGLE_ANALYTICS = 'UA-77451117-2'
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
