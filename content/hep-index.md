@@ -12,7 +12,7 @@ HEP No. | タイトル | 概要
 [HEP4] | スクリプト変換 | シナリオファイルから抽出した構造データはXSLTを用いてスクリプトへ変換されます。
 
 
-[HEP1]: /hep1.html
-[HEP2]: /hep2.html
-[HEP3]: /hep3.html
-[HEP4]: /hep4.html
+[HEP1]: /hestia/hep1.html
+[HEP2]: /hestia/hep2.html
+[HEP3]: /hestia/hep3.html
+[HEP4]: /hestia/hep4.html
