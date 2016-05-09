@@ -12,7 +12,8 @@ from markdown.treeprocessors import Treeprocessor
 from markdown import util
 import re
 
-NAME_RE = re.compile(ur"^【([^】]+)】(.*)")
+NAME_RE = re.compile(r"^【([^】]+)】(.*)")
+COMMENT_RE = re.compile(r"^※(.*)$")
 
 class ScenarioParagraphTreeprocessor(Treeprocessor):
     def run(self, doc):
@@ -28,6 +29,9 @@ class ScenarioParagraphTreeprocessor(Treeprocessor):
                 span.set("class", "name")
                 elem.insert(0, span)
                 cls_type = "speech"
+            elif COMMENT_RE.match(elem.text):
+                elem.text = elem.text[1:]
+                cls_type = "comment"
             else:
                 cls_type = "description"
             cls = elem.get("class")

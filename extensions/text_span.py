@@ -16,6 +16,8 @@ class TextSpanTreeprocessor(Treeprocessor):
         for elem in doc.getiterator():
             if elem.tag != "p":
                 continue
+            if "comment" in elem.attrib.get("class", ""):
+                continue
             if elem.text and elem.text.strip():
                 span = self.create_span()
                 span.text = elem.text
