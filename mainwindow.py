@@ -5,10 +5,12 @@ from __future__ import division
 import os
 
 from lxml import etree
+import six
 
 import qt
 from qt import pyqtSlot, pyqtSignal
 from qt import Qt
+from qt import QCoreApplication
 from qt import QModelIndex
 from qt import QMainWindow
 from qt import QDialog
@@ -33,6 +35,10 @@ from filenameeditdialog import FileNameEditDialog
 DEFAULT_EXT = ".txt"
 HESTIA_EXT = ".hax"
 
+XSLT_MARKDOWN = "transforms/Markdown.xsl"
+XSLT_KAG3 = "transforms/KAG3.xsl"
+XSLT_NSCRIPTER = "transforms/NScripter.xsl"
+
 
 class MainWindow(QMainWindow):
 
@@ -50,6 +56,7 @@ class MainWindow(QMainWindow):
         w = width // 3
         m = width % 3
         self.ui.splitterScenario.setSizes([w, w*2+m])
+        self.ui.splitterScript.setSizes([w, w*2+m])
 
         self.highlighter = ScenarioHighlighter(self.ui.textEditScenario.document())
 
@@ -65,11 +72,14 @@ class MainWindow(QMainWindow):
 
         self.ui.treeViewScenario.setModel(self.projectModel)
         self.ui.treeViewStructure.setModel(self.projectModel)
+        self.ui.treeViewScript.setModel(self.projectModel)
         self.scenarioSelection = self.ui.treeViewScenario.selectionModel()
         self.structureSelection = self.ui.treeViewStructure.selectionModel()
+        self.scriptSelection = self.ui.treeViewScript.selectionModel()
 
         self.scenarioSelection.currentRowChanged.connect(self.scenarioSelection_currentRowChanged, Qt.QueuedConnection)
         self.structureSelection.currentRowChanged.connect(self.structureSelection_currentRowChanged)
+        self.scriptSelection.currentRowChanged.connect(self.scriptSelection_currentRowChanged)
 
         self.structureModel = StructureListModel(self)
 
@@ -161,8 +171,10 @@ class MainWindow(QMainWindow):
     def projectModel_projectUpdated(self):
         self.ui.treeViewScenario.setRootIndex(self.projectModel.index(0, 0))
         self.ui.treeViewStructure.setRootIndex(self.projectModel.index(0, 0))
+        self.ui.treeViewScript.setRootIndex(self.projectModel.index(0, 0))
         self.ui.treeViewScenario.expandAll()
         self.ui.treeViewStructure.expandAll()
+        self.ui.treeViewScript.expandAll()
 
     @pyqtSlot()
     def on_actionNew_triggered(self):
@@ -280,11 +292,51 @@ class MainWindow(QMainWindow):
         previousItem = previous.internalPointer()
         if not isinstance(currentItem, FileItem):
             return
-        currentItem = current.internalPointer()
-        text = currentItem.object.text()
-        xhtml = converter.toXHTML(text)
-        root = etree.fromstring(xhtml)
+        root = self.indexToDOM(current)
+        if root is None:
+            return
         self.structureModel.setRoot(root)
+
+    @pyqtSlot(QModelIndex, QModelIndex)
+    def scriptSelection_currentRowChanged(self, current, previous):
+        if not current.isValid():
+            return
+        currentItem = current.internalPointer()
+        previousItem = previous.internalPointer()
+        if not isinstance(currentItem, FileItem):
+            return
+        root = self.indexToDOM(current)
+        if root is None:
+            return
+        script = self.makeScript(root)
+        self.ui.textEditScript.setPlainText(script)
+
+    def indexToDOM(self, index):
+        if not index.isValid():
+            return None
+        item = index.internalPointer()
+        if not isinstance(item, FileItem):
+            return None
+        text = item.object.text()
+        xhtml = converter.toXHTML(text)
+        return etree.fromstring(xhtml)
+
+    def makeScript(self, root):
+        xslt = self.currentTargetXSLT()
+        return six.text_type(xslt(root))
+
+    def currentTargetXSLT(self):
+        root = qt.toUnicode(QCoreApplication.applicationDirPath())
+        if __debug__:
+            root = os.path.dirname(__file__)
+        if self.ui.actionMarkdown.isChecked():
+            return etree.XSLT(etree.parse(os.path.join(root, XSLT_MARKDOWN)))
+        elif self.ui.actionKAG3.isChecked():
+            return etree.XSLT(etree.parse(os.path.join(root, XSLT_KAG3)))
+        elif self.ui.actionNScripter.isChecked():
+            return etree.XSLT(etree.parse(os.path.join(root, XSLT_NSCRIPTER)))
+        else:
+            raise Exception
 
     @pyqtSlot(QModelIndex)
     def scenarioRestored(self, index):

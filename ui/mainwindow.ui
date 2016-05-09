@@ -52,6 +52,22 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabScript">
+       <attribute name="title">
+        <string>Script</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QSplitter" name="splitterScript">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QTreeView" name="treeViewScript"/>
+          <widget class="QTextEdit" name="textEditScript"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -84,8 +100,23 @@
     <addaction name="actionScenarioSaveAs"/>
     <addaction name="actionScenarioRemove"/>
    </widget>
+   <widget class="QMenu" name="menuScript">
+    <property name="title">
+     <string>Script</string>
+    </property>
+    <widget class="QMenu" name="menuTarget">
+     <property name="title">
+      <string>Target</string>
+     </property>
+     <addaction name="actionMarkdown"/>
+     <addaction name="actionKAG3"/>
+     <addaction name="actionNScripter"/>
+    </widget>
+    <addaction name="menuTarget"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuScenario"/>
+   <addaction name="menuScript"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -131,6 +162,33 @@
   <action name="actionScenarioSave">
    <property name="text">
     <string>Save</string>
+   </property>
+  </action>
+  <action name="actionMarkdown">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Markdown</string>
+   </property>
+  </action>
+  <action name="actionKAG3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>KAG3</string>
+   </property>
+  </action>
+  <action name="actionNScripter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>NScripter</string>
    </property>
   </action>
  </widget>
