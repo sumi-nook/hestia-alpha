@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="text" encoding="UTF-8"/>
-<xsl:template match="/div[@class='root']">
+<xsl:template match="/div">
 <xsl:text></xsl:text>
 <xsl:apply-templates/>
 <xsl:text></xsl:text>
@@ -10,13 +10,15 @@
 <xsl:template match="p[contains(@class, 'speech')]">
 <xsl:text></xsl:text>
 <xsl:apply-templates/>
-<xsl:text>\</xsl:text>
+<xsl:text>\
+</xsl:text>
 </xsl:template>
 
 <xsl:template match="p[contains(@class, 'description')]">
 <xsl:text></xsl:text>
 <xsl:apply-templates/>
-<xsl:text>\</xsl:text>
+<xsl:text>\
+</xsl:text>
 </xsl:template>
 
 <xsl:template match="a">
@@ -26,13 +28,14 @@
 </xsl:template>
 
 <xsl:template match="br">
-<xsl:text>br</xsl:text>
+<xsl:text>br
+</xsl:text>
 </xsl:template>
 
 <xsl:template match="span[contains(@class, 'name')]">
-<xsl:text></xsl:text>
+<xsl:text>[</xsl:text>
 <xsl:value-of select="text()"/>
-<xsl:text></xsl:text>
+<xsl:text>]</xsl:text>
 </xsl:template>
 
 <xsl:template match="span[contains(@class, 'text')]">
