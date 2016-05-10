@@ -15,7 +15,7 @@ setup(
     windows=[{"script" : "main.py",
               "dest_base": "Hestia",
               # version info.
-              "version": "0.0.0.1",
+              "version": "0.0.0.2",
               "name": "Hestia",
               "company_name:": "nook",
               "copyright": "Copyright (c) 2016 S2_SUMI.",
