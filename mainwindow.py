@@ -12,6 +12,7 @@ from qt import pyqtSlot, pyqtSignal
 from qt import Qt
 from qt import QCoreApplication
 from qt import QModelIndex
+from qt import QAction
 from qt import QMainWindow
 from qt import QDialog
 from qt import QFileDialog
@@ -43,11 +44,18 @@ XSLT_NSCRIPTER = "transforms/NScripter.xsl"
 class MainWindow(QMainWindow):
 
     scenarioRestore = pyqtSignal(QModelIndex)
+    scriptUpdate = pyqtSignal()
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.targetActions = [
+            self.ui.actionMarkdown,
+            self.ui.actionKAG3,
+            self.ui.actionNScripter,
+        ]
 
         # constants
         self.HESTIA_ARCHIVE_FILTER = self.tr("Hestia Archive(*.hax)")
@@ -257,6 +265,19 @@ class MainWindow(QMainWindow):
         self.project.append(scenario)
         self.setCurrentScenario(scenario)
 
+    @pyqtSlot(QAction)
+    def on_menuTarget_triggered(self, target):
+        # force checked
+        target.setChecked(True)
+        # Toggle target
+        for action in self.targetActions:
+            if action == target:
+                continue
+            if action.isChecked():
+                action.setChecked(False)
+        current = self.scriptSelection.currentIndex()
+        self.showScript(current)
+
     @pyqtSlot(QModelIndex, QModelIndex)
     def scenarioSelection_currentRowChanged(self, current, previous):
         if not current.isValid():
@@ -299,14 +320,20 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(QModelIndex, QModelIndex)
     def scriptSelection_currentRowChanged(self, current, previous):
-        if not current.isValid():
+        self.showScript(current)
+
+    @pyqtSlot(QModelIndex)
+    def showScript(self, index):
+        if not index.isValid():
+            self.ui.textEditScript.clear()
             return
-        currentItem = current.internalPointer()
-        previousItem = previous.internalPointer()
-        if not isinstance(currentItem, FileItem):
+        item = index.internalPointer()
+        if not isinstance(item, FileItem):
+            self.ui.textEditScript.clear()
             return
-        root = self.indexToDOM(current)
+        root = self.indexToDOM(index)
         if root is None:
+            self.ui.textEditScript.clear()
             return
         script = self.makeScript(root)
         self.ui.textEditScript.setPlainText(script)
