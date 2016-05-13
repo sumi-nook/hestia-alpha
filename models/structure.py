@@ -43,6 +43,8 @@ class StructureListModel(QAbstractListModel):
             return self._speechText(node)
         elif "description" in cls:
             return self._descriptionText(node)
+        elif "comment" in cls:
+            return self._commentText(node)
 
     def _speechText(self, node):
         name = node[0].text
@@ -51,6 +53,9 @@ class StructureListModel(QAbstractListModel):
 
     def _descriptionText(self, node):
         return self._nodesText(node)
+
+    def _commentText(self, node):
+        return "※{}".format(self._nodesText(node.iter()))
 
     def _nodesText(self, node):
         return "".join(x for x in self._nodesTexts(node))
