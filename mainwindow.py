@@ -31,6 +31,7 @@ import converter
 from ui.mainwindow import Ui_MainWindow
 
 from filenameeditdialog import FileNameEditDialog
+from glwindow import GLWindow
 
 
 DEFAULT_EXT = ".txt"
@@ -69,6 +70,9 @@ class MainWindow(QMainWindow):
         self.highlighter = ScenarioHighlighter(self.ui.textEditScenario.document())
 
         self.scenarioRestore.connect(self.scenarioRestored)
+
+        self.glWindow = GLWindow(self)
+        self.glWindow.setViewSize(1280, 720)
 
         self.initialize()
 
@@ -264,6 +268,10 @@ class MainWindow(QMainWindow):
         scenario.setFilePath(filename)
         self.project.append(scenario)
         self.setCurrentScenario(scenario)
+
+    @pyqtSlot()
+    def on_actionShowPreview_triggered(self):
+        self.glWindow.show()
 
     @pyqtSlot(QAction)
     def on_menuTarget_triggered(self, target):

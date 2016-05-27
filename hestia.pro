@@ -3,6 +3,7 @@ SOURCES = \
     mainwindow.py \
     converter.py \
     filenameeditdialog.py \
+    glwindow.py \
     highlighter.py \
     archive/container.py \
     archive/exceptions.py \
@@ -17,7 +18,8 @@ SOURCES = \
 
 FORMS = \
     ui/mainwindow.ui \
-    ui/filenameeditdialog.ui
+    ui/filenameeditdialog.ui \
+    ui/glwindow.ui
 
 TRANSLATIONS = hestia_ja.ts
 

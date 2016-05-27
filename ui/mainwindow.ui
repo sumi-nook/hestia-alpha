@@ -114,8 +114,15 @@
     </widget>
     <addaction name="menuTarget"/>
    </widget>
+   <widget class="QMenu" name="menuStructure">
+    <property name="title">
+     <string>Structure</string>
+    </property>
+    <addaction name="actionShowPreview"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuScenario"/>
+   <addaction name="menuStructure"/>
    <addaction name="menuScript"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -204,6 +211,11 @@
    </property>
    <property name="text">
     <string>NScripter</string>
+   </property>
+  </action>
+  <action name="actionShowPreview">
+   <property name="text">
+    <string>ShowPreview</string>
    </property>
   </action>
  </widget>

@@ -2,3 +2,4 @@
 
 pyuic4 ui/mainwindow.ui -o ui/mainwindow.py
 pyuic4 ui/filenameeditdialog.ui -o ui/filenameeditdialog.py
+pyuic4 ui/glwindow.ui -o ui/glwindow.py
