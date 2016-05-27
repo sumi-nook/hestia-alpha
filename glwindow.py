@@ -15,7 +15,7 @@ class GLWindow(QMainWindow):
         self.ui.setupUi(self)
 
     def setViewSize(self, width, height):
-        self.rate = height / width
         maximum = QSize(16777215, 16777215)
-        self.ui.openGLWidget.setMinimumSize(maximum)
+        self.ui.openGLWidget.setMaximumSize(maximum)
         self.ui.openGLWidget.setMinimumSize(width, height)
+        self.ui.openGLWidget.setMaximumSize(width, height)
