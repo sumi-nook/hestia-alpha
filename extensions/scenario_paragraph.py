@@ -20,6 +20,10 @@ class ScenarioParagraphTreeprocessor(Treeprocessor):
         for elem in doc.getiterator():
             if elem.tag != "p":
                 continue
+            if not elem.text:
+                if len(elem) == 1 and elem[0].tag == "img":
+                    elem.set("class", "image")
+                continue
             m = NAME_RE.match(elem.text)
             if m:
                 elem.text = None

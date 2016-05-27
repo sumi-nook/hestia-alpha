@@ -38,13 +38,20 @@ class StructureListModel(QAbstractListModel):
         return self._nodeToValue(self._root[index.row()])
 
     def _nodeToValue(self, node):
-        cls = node.attrib["class"]
-        if "speech" in cls:
-            return self._speechText(node)
-        elif "description" in cls:
-            return self._descriptionText(node)
-        elif "comment" in cls:
-            return self._commentText(node)
+        if node.tag == "p":
+            cls = node.attrib.get("class", "")
+            if "speech" in cls:
+                return self._speechText(node)
+            elif "description" in cls:
+                return self._descriptionText(node)
+            elif "comment" in cls:
+                return self._commentText(node)
+            elif "image" in cls:
+                return self._image(node[0])
+            else:
+                return QVariant()
+        else:
+            return QVariant()
 
     def _speechText(self, node):
         name = node[0].text
@@ -65,3 +72,6 @@ class StructureListModel(QAbstractListModel):
             if child.text:
                 yield child.text
             yield self._nodesText(child)
+
+    def _image(self, node):
+        return "※画像:{}".format(node.attrib["src"])
