@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
+import sys
 
+import ftgl
 from lxml import etree
 import six
 
@@ -28,11 +32,23 @@ from models.structure import StructureListModel
 from highlighter import ScenarioHighlighter
 import converter
 
+from emulator.scene import DoubleBufferObject
+from gl.figure import RelativeQuad
+from gl.text import TextObject
+from gl.base import Rect
+from gl.image import PILImageTexture
+from gl.wrapper import *
+
 from ui.mainwindow import Ui_MainWindow
 
 from filenameeditdialog import FileNameEditDialog
 from glwindow import GLWindow
 
+
+DEFAULT_ENCODING = "utf-8"
+if os.name == "nt":
+    DEFAULT_ENCODING = "cp932"
+DEFAULT_FONT = "fonts/ipag.ttc"
 
 DEFAULT_EXT = ".txt"
 HESTIA_EXT = ".hax"
@@ -71,8 +87,13 @@ class MainWindow(QMainWindow):
 
         self.scenarioRestore.connect(self.scenarioRestored)
 
+        self.previewHasReady = False
         self.glWindow = GLWindow(self)
         self.glWindow.setViewSize(1280, 720)
+        self.glWindow.ready.connect(self.previewWindow_ready)
+
+        self.doubleBufferObject = DoubleBufferObject()
+        self.glWindow.setDoubleBufferObject(self.doubleBufferObject)
 
         self.initialize()
 
@@ -82,6 +103,7 @@ class MainWindow(QMainWindow):
         self.projectModel = ProjectTreeModel(self)
         self.projectModel.projectUpdated.connect(self.projectModel_projectUpdated)
 
+        # file selection view
         self.ui.treeViewScenario.setModel(self.projectModel)
         self.ui.treeViewStructure.setModel(self.projectModel)
         self.ui.treeViewScript.setModel(self.projectModel)
@@ -93,9 +115,13 @@ class MainWindow(QMainWindow):
         self.structureSelection.currentRowChanged.connect(self.structureSelection_currentRowChanged)
         self.scriptSelection.currentRowChanged.connect(self.scriptSelection_currentRowChanged)
 
+        # scenario structure view
         self.structureModel = StructureListModel(self)
 
         self.ui.listViewStructure.setModel(self.structureModel)
+        self.lineSelection = self.ui.listViewStructure.selectionModel()
+
+        self.lineSelection.currentRowChanged.connect(self.lineSelection_currentRowChanged)
 
         self.setProject(ProjectFile.create())
 
@@ -187,6 +213,26 @@ class MainWindow(QMainWindow):
         self.ui.treeViewScenario.expandAll()
         self.ui.treeViewStructure.expandAll()
         self.ui.treeViewScript.expandAll()
+
+    @pyqtSlot()
+    def previewWindow_ready(self):
+        self.previewHasReady = True
+        # set default font
+        if __debug__:
+            path = os.path.join(os.path.dirname(__file__), DEFAULT_FONT)
+        else:
+            appDir = six.text_type(QCoreApplication.applicationDirPath())
+            path = os.path.join(appDir, DEFAULT_FONT)
+        if not os.path.exists(path):
+            QMessageBox.critical(self,
+                self.tr("Font not found"),
+                self.tr("Font \"%1\" cannot open.").arg(path)
+            )
+            sys.exit(1)
+        font = ftgl.FTPixmapFont(path.encode(DEFAULT_ENCODING))
+        if not font.FaceSize(30):
+            print("FaceSize error.", file=sys.stderr)
+        self.glWindow.context().fontRegistry.installFont(None, font)
 
     @pyqtSlot()
     def on_actionNew_triggered(self):
@@ -376,3 +422,18 @@ class MainWindow(QMainWindow):
     @pyqtSlot(QModelIndex)
     def scenarioRestored(self, index):
         self.ui.treeViewScenario.setCurrentIndex(index)
+
+    @pyqtSlot(QModelIndex, QModelIndex)
+    def lineSelection_currentRowChanged(self, current, previous):
+        obj = LoadIdentity() & Ortho2DContext() & BlendWrapper(Color(0.0, 0.0, 0.0, 0.5) & RelativeQuad(Rect(0.0, 0.0, 1280, 300)))
+        self.doubleBufferObject.setMessageWindow(obj)
+
+        text = self.currentText(current)
+        obj = LoadIdentity() & Ortho2DContext() & Color(1.0, 1.0, 1.0) & RasterPos(100, 200) & TextObject(text)
+        self.doubleBufferObject.setMessage(obj)
+
+        self.doubleBufferObject.flip()
+
+    def currentText(self, current):
+        item = self.structureModel.data(current)
+        return six.text_type(item)
