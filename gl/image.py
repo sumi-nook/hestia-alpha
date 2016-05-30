@@ -132,7 +132,7 @@ class ImageTexture(Texture):
 
 class PILImageTexture(ImageTexture):
     @staticmethod
-    def create(path):
+    def create(path, rect=None):
         from PIL import Image
 
         img = Image.open(path)
@@ -151,4 +151,4 @@ class PILImageTexture(ImageTexture):
         # image data
         data = pot_img.tostring()
 
-        return PILImageTexture(mode, x, y, width, height, data)
+        return PILImageTexture(mode, x, y, width, height, data, rect)

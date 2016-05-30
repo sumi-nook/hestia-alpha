@@ -1,4 +1,5 @@
 six
+enum34
 markdown
 lxml
 OpenGL

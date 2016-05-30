@@ -4,11 +4,18 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.WGL import *
 
+from qt import pyqtSlot
 from qt import pyqtSignal
 from qt import QGLWidget
 
 from gl.context import DrawContext
+from gl.context import MatrixContext
 from gl.environment import GlobalEnvironment
+
+from gl.wrapper import *
+from gl.figure import RelativeQuad
+from gl.text import TextObject
+from gl.base import Rect
 
 
 class OpenGLWidget(QGLWidget):
@@ -39,12 +46,18 @@ class OpenGLWidget(QGLWidget):
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT)
+        glLoadIdentity()
 
         for obj in self.objects:
-            obj.draw(self.ctx)
+            with MatrixContext():
+                obj.draw(self.ctx)
 
     def appendObject(self, obj):
         self.objects.append(obj)
 
+    @pyqtSlot()
     def flush(self):
         self.updateGL()
+
+    def context(self):
+        return self.ctx
