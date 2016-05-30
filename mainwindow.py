@@ -36,7 +36,6 @@ from emulator.scene import DoubleBufferObject
 from gl.figure import RelativeQuad
 from gl.text import TextObject
 from gl.base import Rect
-from gl.image import PILImageTexture
 from gl.wrapper import *
 
 from ui.mainwindow import Ui_MainWindow

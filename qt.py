@@ -3,6 +3,7 @@
 import six
 
 from PyQt4.Qt import *
+from PyQt4.QtOpenGL import *
 
 VERSION = 4
 
