@@ -425,6 +425,11 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(QModelIndex, QModelIndex)
     def lineSelection_currentRowChanged(self, current, previous):
+        node = current.internalPointer()
+        if node.ctx.bg_img:
+            obj = ImageTexture.create(node.ctx.bg_img.src)
+            self.doubleBufferObject.setBackgroundImage(obj)
+
         obj = LoadIdentity() & Ortho2DContext() & BlendWrapper(Color(0.0, 0.0, 0.0, 0.5) & RelativeQuad(Rect(0.0, 0.0, 1280, 300)))
         self.doubleBufferObject.setMessageWindow(obj)
 

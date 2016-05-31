@@ -22,7 +22,11 @@ class ScenarioParagraphTreeprocessor(Treeprocessor):
                 continue
             if not elem.text:
                 if len(elem) == 1 and elem[0].tag == "img":
-                    elem.set("class", "image")
+                    if elem[0].attrib["alt"] == "背景":
+                        elem.set("class", "bg-image")
+                        elem[0].set("class", "background")
+                    else:
+                        elem.set("class", "image")
                 continue
             m = NAME_RE.match(elem.text)
             if m:
