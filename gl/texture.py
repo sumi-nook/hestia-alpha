@@ -28,15 +28,12 @@ class TextureUnit(object):
         return glGetInteger(GL_ACTIVE_TEXTURE)
 
 
-class Texture(DrawObject):
+class Texture(object):
     def __init__(self, texture_id=None):
         if texture_id is None:
             texture_id = glGenTextures(1)
-        self.texture_id = texture_id
+        self.id = texture_id
         self.unit = None
-
-    def draw(self, ctx):
-        raise NotImplementedError
 
     @property
     def unit(self):

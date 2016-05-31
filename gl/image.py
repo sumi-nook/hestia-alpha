@@ -85,9 +85,10 @@ def pot_square_resize(img, maximum=None):
     return new_img, w / base, h / base
 
 
-class ImageTexture(Texture):
-    def __init__(self, mode, x, y, width, height, data, rect=None):
-        super(ImageTexture, self).__init__()
+class Image(DrawObject):
+    def __init__(self, texture, mode, x, y, width, height, data, rect=None):
+        super(Image, self).__init__()
+        self.texture = texture
         self.mode = mode
         # mapping size
         self.x = x
@@ -102,8 +103,9 @@ class ImageTexture(Texture):
         if rect is None:
             self.rect = Rect(-1.0, -1.0, 1.0, 1.0)
 
+        # bind texture
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        glBindTexture(GL_TEXTURE_2D, self.texture_id)
+        glBindTexture(GL_TEXTURE_2D, self.texture.id)
         glTexImage2D(GL_TEXTURE_2D, 0, self.mode, self.width, self.height,
                      0, self.mode, GL_UNSIGNED_BYTE, self.data)
 
@@ -117,7 +119,7 @@ class ImageTexture(Texture):
     def draw(self, ctx):
         glEnable(GL_TEXTURE_2D)
 
-        glBindTexture(GL_TEXTURE_2D, self.texture_id)
+        glBindTexture(GL_TEXTURE_2D, self.texture.id)
 
         glBegin(GL_QUADS)
         # left, top
@@ -139,7 +141,7 @@ class ImageTexture(Texture):
         glFlush()
 
     @staticmethod
-    def create(path, rect=None):
+    def create(texture, path, rect=None):
         img = QImage(path)
 
         # convert to pot image
@@ -153,4 +155,4 @@ class ImageTexture(Texture):
         tex_img = QGLWidget.convertToGLFormat(pot_img)
         data = tex_img.bits().asstring(tex_img.numBytes())
 
-        return ImageTexture(mode, x, y, width, height, data, rect)
+        return Image(texture, mode, x, y, width, height, data, rect)

@@ -35,7 +35,7 @@ import converter
 from emulator.scene import DoubleBufferObject
 from gl.base import Rect
 from gl.figure import RelativeQuad
-from gl.image import ImageTexture
+from gl.image import Image
 from gl.text import TextObject
 from gl.wrapper import *
 
@@ -92,8 +92,7 @@ class MainWindow(QMainWindow):
         self.glWindow.setViewSize(1280, 720)
         self.glWindow.ready.connect(self.previewWindow_ready)
 
-        self.doubleBufferObject = DoubleBufferObject()
-        self.glWindow.setDoubleBufferObject(self.doubleBufferObject)
+        self.doubleBufferObject = None
 
         self.initialize()
 
@@ -233,6 +232,11 @@ class MainWindow(QMainWindow):
         if not font.FaceSize(30):
             print("FaceSize error.", file=sys.stderr)
         self.glWindow.context().fontRegistry.installFont(None, font)
+
+        # init double buffer
+        self.doubleBufferObject = DoubleBufferObject()
+        self.glWindow.setDoubleBufferObject(self.doubleBufferObject)
+
 
     @pyqtSlot()
     def on_actionNew_triggered(self):
@@ -427,7 +431,8 @@ class MainWindow(QMainWindow):
     def lineSelection_currentRowChanged(self, current, previous):
         node = current.internalPointer()
         if node.ctx.bg_img:
-            obj = ImageTexture.create(node.ctx.bg_img.src)
+            texture = self.doubleBufferObject.backBuffer().backgroundTexture()
+            obj = Image.create(texture, node.ctx.bg_img.src)
             self.doubleBufferObject.setBackgroundImage(obj)
 
         obj = LoadIdentity() & Ortho2DContext() & BlendWrapper(Color(0.0, 0.0, 0.0, 0.5) & RelativeQuad(Rect(0.0, 0.0, 1280, 300)))

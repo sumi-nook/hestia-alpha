@@ -6,6 +6,7 @@ from qt import pyqtSignal
 from qt import QObject
 
 from gl.base import DrawObject
+from gl.texture import Texture
 
 
 class Scene(enum.IntEnum):
@@ -17,6 +18,7 @@ class Scene(enum.IntEnum):
 class SceneObject(DrawObject):
     def __init__(self):
         self.objects = {}
+        self.bg_texture = Texture()
 
     def clear(self):
         self.objects = {}
@@ -24,6 +26,9 @@ class SceneObject(DrawObject):
     def draw(self, ctx):
         for key in sorted(self.objects.keys()):
             self.objects[key].draw(ctx)
+
+    def backgroundTexture(self):
+        return self.bg_texture
 
     def setBackgroundImage(self, img):
         self.objects[Scene.BackgroundImage] = img
