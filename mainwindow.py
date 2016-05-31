@@ -33,9 +33,10 @@ from highlighter import ScenarioHighlighter
 import converter
 
 from emulator.scene import DoubleBufferObject
-from gl.figure import RelativeQuad
-from gl.text import TextObject
 from gl.base import Rect
+from gl.figure import RelativeQuad
+from gl.image import ImageTexture
+from gl.text import TextObject
 from gl.wrapper import *
 
 from ui.mainwindow import Ui_MainWindow

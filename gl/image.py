@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import division
+
 import math
 
 from OpenGL.GL import *
-from PIL import Image
+
+from qt import Qt
+from qt import QColor
+from qt import QImage
+from qt import QPainter
+from qt import QGLWidget
 
 from utility import bits
 
@@ -39,41 +46,43 @@ def power_of_two(size, maximum=None):
 def pot_resize(img, maximum=None):
     """Resize image to power of two
 
-    :type img: PIL.Image
+    :type img: QImage
     :param img: input image
     :type maximum: int or None
     :param maximum: maximum size (must be 2**n)
     :return: resized image
     """
-    w, h = img.size
+    w, h = img.width(), img.height()
     base = power_of_two(max(w, h), maximum=maximum)
     if w > h:
-        aspect = float(h) / w
+        aspect = h / w
         h = int(math.ceil(aspect * base))
         w = base
     else:
-        aspect = float(w) / h
+        aspect = w / h
         w = int(math.ceil(aspect * base))
         h = base
-    return img.resize((w, h))
+    return img.scaled(w, h, Qt.KeepAspectRatio, Qt.FastTransformation)
 
 
 def pot_square_resize(img, maximum=None):
     """Resize image to power of two square
 
-    :type img: PIL.Image
+    :type img: QImage
     :param img: input image
     :type maximum: int or None
     :param maximum: maximum size (must be 2**n)
     :return: resized image
     """
     resized = pot_resize(img, maximum=maximum)
-    w, h = resized.size
+    w, h = resized.width(), resized.height()
     base = max(w, h)
     #pad = base - min(w, h)
-    new_img = Image.new(img.mode, (base, base))
-    new_img.paste(resized, (0, 0))
-    return new_img, w / float(base), h / float(base)
+    new_img = QImage(base, base, img.format())
+    new_img.fill(QColor(0, 0, 0))
+    painter = QPainter(new_img)
+    painter.drawImage(0, 0, resized)
+    return new_img, w / base, h / base
 
 
 class ImageTexture(Texture):
@@ -112,43 +121,36 @@ class ImageTexture(Texture):
 
         glBegin(GL_QUADS)
         # left, top
-        glTexCoord2d(0.0, self.y)
+        glTexCoord2d(1.0-self.x, 1.0-self.y)
         glVertex3d(self.rect.x, self.rect.y,  0.0)
-        # right, top
-        glTexCoord2d(self.x, self.y)
-        glVertex3d(self.rect.w, self.rect.y,  0.0)
-        # right, bottom
-        glTexCoord2d(self.x, 0.0)
-        glVertex3d(self.rect.w, self.rect.h,  0.0)
         # left, bottom
-        glTexCoord2d(0.0, 0.0)
+        glTexCoord2d(1.0-self.x, 1.0)
         glVertex3d(self.rect.x, self.rect.h,  0.0)
+        # right, bottom
+        glTexCoord2d(1.0, 1.0)
+        glVertex3d(self.rect.w, self.rect.h,  0.0)
+        # right, top
+        glTexCoord2d(1.0, 1.0-self.y)
+        glVertex3d(self.rect.w, self.rect.y,  0.0)
         glEnd()
 
         glDisable(GL_TEXTURE_2D)
 
         glFlush()
 
-
-class PILImageTexture(ImageTexture):
     @staticmethod
     def create(path, rect=None):
-        from PIL import Image
-
-        img = Image.open(path)
+        img = QImage(path)
 
         # convert to pot image
         pot_img, x, y = pot_square_resize(img)
-        width, height = pot_img.size
+        width, height = pot_img.width(), pot_img.height()
 
-        # detect mode
-        mode = None
-        if pot_img.mode == "RGB":
-            mode = GL_RGB
-        else:
-            mode = GL_RGBA
+        # QImage format: 0xffRRGGBB
+        mode = GL_RGBA
 
         # image data
-        data = pot_img.tostring()
+        tex_img = QGLWidget.convertToGLFormat(pot_img)
+        data = tex_img.bits().asstring(tex_img.numBytes())
 
-        return PILImageTexture(mode, x, y, width, height, data, rect)
+        return ImageTexture(mode, x, y, width, height, data, rect)
