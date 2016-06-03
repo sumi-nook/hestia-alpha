@@ -435,6 +435,8 @@ class MainWindow(QMainWindow):
         item = index.internalPointer()
         if not isinstance(item, FileItem):
             return None
+        if item.object.type() != ContainerType.Scenario:
+            return None
         text = item.object.text()
         xhtml = converter.toXHTML(text)
         return etree.fromstring(xhtml)
