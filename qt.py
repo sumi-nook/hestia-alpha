@@ -11,3 +11,7 @@ def toUnicode(x):
     if VERSION == 4:
         return six.text_type(x)
     return x
+
+
+if VERSION == 5:
+    QString = str

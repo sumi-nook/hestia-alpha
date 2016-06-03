@@ -140,10 +140,16 @@ class Image(DrawObject):
 
         glFlush()
 
-    @staticmethod
-    def create(texture, path, rect=None):
-        img = QImage(path)
+    @classmethod
+    def create(cls, texture, path, rect=None):
+        return cls._create(texture, QImage(path), rect)
 
+    @classmethod
+    def fromData(cls, texture, data, rect=None):
+        return cls._create(texture, QImage.fromData(data), rect)
+
+    @classmethod
+    def _create(cls, texture, img, rect=None):
         # convert to pot image
         pot_img, x, y = pot_square_resize(img)
         width, height = pot_img.width(), pot_img.height()

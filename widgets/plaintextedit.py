@@ -2,6 +2,8 @@
 
 from qt import QTextEdit
 
+from archive.container import Scenario
+
 class PlainTextEdit(QTextEdit):
     def insertFromMimeData(self, source):
         self.insertPlainText(source.text())
@@ -10,4 +12,5 @@ class PlainTextEdit(QTextEdit):
         """
         :type scenario: archive.container.Scenario
         """
-        self.setPlainText(scenario.content.decode("utf-8"))
+        assert(isinstance(scenario, Scenario))
+        self.setPlainText(scenario.text())

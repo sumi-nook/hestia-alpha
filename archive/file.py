@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import os
 import six
 
 from io import BytesIO
@@ -45,6 +46,17 @@ class ProjectFile(QObject):
 
     def setFilePath(self, filepath):
         self.filepath = filepath
+
+    def loadResource(self, path, test_exts=[]):
+        path = os.path.normpath(path)
+        for name in self.fp.namelist():
+            if name == path:
+                return self.fp.read(name)
+            for ext in test_exts:
+                if name != (path + ext):
+                    continue
+                return self.fp.read(name)
+        return None
 
     def isChanged(self):
         return not self.saved

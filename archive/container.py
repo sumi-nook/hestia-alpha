@@ -13,15 +13,25 @@ from qt import QObject
 DEFAULT_ENCODING = "utf-8"
 
 
+class DummyFileObject(object):
+    def __init__(self, content):
+        self._content = content
+
+    def read(self, filepath):
+        return self._content
+
+
 class ContainerBase(QObject):
 
     changed = pyqtSignal(object)
 
-    def __init__(self, parent=None):
+    def __init__(self, file, filepath, parent=None):
         """
         :type parent: QObject
         """
         super(ContainerBase, self).__init__(parent)
+        self.file = file
+        self.filepath = filepath
 
     def archive(self, archive):
         """
@@ -29,29 +39,11 @@ class ContainerBase(QObject):
         """
         raise NotImplementedError
 
-
-class Scenario(ContainerBase):
-    def __init__(self, filepath, content):
+    def content(self):
         """
-        :type filepath: str
-        :type content: bytes
+        :rtype: bytes
         """
-        super(Scenario, self).__init__()
-        self.filepath = filepath
-        self.content = content
-
-    def archive(self, archive):
-        """
-        :type archive: zipfile.ZipFile
-        """
-        assert(self.filepath is not None)
-        archive.writestr(self.filepath, self.content)
-
-    def isSame(self, text):
-        """
-        :rtype: bool
-        """
-        return self.content == text.encode(DEFAULT_ENCODING)
+        return self.file.read(self.filepath)
 
     def filePath(self):
         """
@@ -65,18 +57,41 @@ class Scenario(ContainerBase):
         """
         self.filepath = filepath
 
+
+class Scenario(ContainerBase):
+    def __init__(self, file, filepath, parent=None):
+        """
+        :type filepath: str
+        :type content: bytes
+        """
+        super(Scenario, self).__init__(file, filepath, parent)
+        self._content = self.content()
+
+    def archive(self, archive):
+        """
+        :type archive: zipfile.ZipFile
+        """
+        assert(self.filepath is not None)
+        archive.writestr(self.filePath(), self._content)
+
+    def isSame(self, text):
+        """
+        :rtype: bool
+        """
+        return self._content == text.encode(DEFAULT_ENCODING)
+
     def text(self):
         """
         :rtype: str
         """
-        return self.content.decode(DEFAULT_ENCODING, "ignore")
+        return self._content.decode(DEFAULT_ENCODING, "ignore")
 
     def setText(self, text):
         """
         :type archive: str
         """
         assert(isinstance(text, six.text_type))
-        self.content = text.encode(DEFAULT_ENCODING)
+        self._content = text.encode(DEFAULT_ENCODING)
         self.changed.emit(self)
 
     @staticmethod
@@ -84,12 +99,30 @@ class Scenario(ContainerBase):
         """
         :rtype: Scenario
         """
-        return Scenario(None, b"")
+        return Scenario(DummyFileObject(b""), None)
+
+
+class Image(ContainerBase):
+    def __init__(self, file, filepath, parent=None):
+        """
+        :type filepath: str
+        :type content: bytes
+        """
+        super(Image, self).__init__(file, filepath, parent)
+        self._content = self.content()
+
+    def archive(self, archive):
+        """
+        :type archive: zipfile.ZipFile
+        """
+        assert(self.filepath is not None)
+        archive.writestr(self.filePath(), self.content())
 
 
 EXT_MAP = {
     ".txt": Scenario,
     ".md": Scenario,
+    ".png": Image,
 }
 
 
@@ -103,5 +136,5 @@ def parse(archive):
         root, ext = os.path.splitext(name)
         if ext not in EXT_MAP:
             continue
-        result.append(EXT_MAP[ext](name, archive.read(name)))
+        result.append(EXT_MAP[ext](archive, name))
     return result

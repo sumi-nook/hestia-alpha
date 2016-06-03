@@ -25,7 +25,6 @@ from qt import QMessageBox
 from qt import QItemSelectionModel
 
 from archive.file import ProjectFile
-from archive.container import ContainerBase
 from archive.container import Scenario
 from models.project import ProjectTreeModel
 from models.project import FileItem
@@ -42,6 +41,7 @@ from gl.wrapper import *
 
 from ui.mainwindow import Ui_MainWindow
 
+from errormessagedialog import ErrorMessageDialog
 from filenameeditdialog import FileNameEditDialog
 from glwindow import GLWindow
 
@@ -87,6 +87,8 @@ class MainWindow(QMainWindow):
         self.highlighter = ScenarioHighlighter(self.ui.textEditScenario.document())
 
         self.scenarioRestore.connect(self.scenarioRestored)
+
+        self.errorMessageDialog = ErrorMessageDialog(self)
 
         self.previewHasReady = False
         self.glWindow = GLWindow(self)
@@ -462,16 +464,41 @@ class MainWindow(QMainWindow):
         if not current.isValid():
             return
         node = current.internalPointer()
+        # background image
         if node.ctx.bg_img:
             texture = self.doubleBufferObject.backBuffer().backgroundTexture()
-            obj = Image.create(texture, node.ctx.bg_img.src)
-            self.doubleBufferObject.setBackgroundImage(obj)
+            path = node.ctx.bg_img.src
+            data = self.project.loadResource(path, test_exts=[".png"])
+            if data:
+                obj = Image.fromData(texture, data)
+                self.doubleBufferObject.setBackgroundImage(obj)
+            else:
+                # load failed
+                self.errorMessageDialog.appendMessage(
+                    self.tr('Resource "%1" not found.').arg(path)
+                )
+                self.errorMessageDialog.show()
 
-        obj = LoadIdentity() & Ortho2DContext() & BlendWrapper(Color(0.0, 0.0, 0.0, 0.5) & RelativeQuad(Rect(0.0, 0.0, 1280, 300)))
+        # message window
+        obj = (
+            LoadIdentity() &
+            Ortho2DContext() &
+            BlendWrapper(
+                Color(0.0, 0.0, 0.0, 0.5) &
+                RelativeQuad(Rect(0.0, 0.0, 1280, 300))
+            )
+        )
         self.doubleBufferObject.setMessageWindow(obj)
 
+        # message
         text = self.currentText(current)
-        obj = LoadIdentity() & Ortho2DContext() & Color(1.0, 1.0, 1.0) & RasterPos(100, 200) & TextObject(text)
+        obj = (
+            LoadIdentity() &
+            Ortho2DContext() &
+            Color(1.0, 1.0, 1.0) &
+            RasterPos(100, 200) &
+            TextObject(text)
+        )
         self.doubleBufferObject.setMessage(obj)
 
         self.doubleBufferObject.flip()
