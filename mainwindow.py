@@ -92,6 +92,8 @@ class MainWindow(QMainWindow):
         self.glWindow = GLWindow(self)
         self.glWindow.setViewSize(1280, 720)
         self.glWindow.ready.connect(self.previewWindow_ready)
+        self.glWindow.next.connect(self.previewWindow_toNext)
+        self.glWindow.prev.connect(self.previewWindow_toPrev)
 
         self.doubleBufferObject = None
 
@@ -240,6 +242,29 @@ class MainWindow(QMainWindow):
         self.doubleBufferObject = DoubleBufferObject()
         self.glWindow.setDoubleBufferObject(self.doubleBufferObject)
 
+    @pyqtSlot()
+    def previewWindow_toNext(self):
+        if not self.previewHasReady:
+            return
+        index = self.lineSelection.currentIndex()
+        if not index.isValid():
+            return
+        next = index.sibling(index.row()+1, index.column())
+        if not index.isValid():
+            return
+        self.lineSelection.setCurrentIndex(next, QItemSelectionModel.SelectCurrent)
+
+    @pyqtSlot()
+    def previewWindow_toPrev(self):
+        if not self.previewHasReady:
+            return
+        index = self.lineSelection.currentIndex()
+        if not index.isValid():
+            return
+        next = index.sibling(index.row()-1, index.column())
+        if not index.isValid():
+            return
+        self.lineSelection.setCurrentIndex(next, QItemSelectionModel.SelectCurrent)
 
     @pyqtSlot()
     def on_actionNew_triggered(self):
@@ -433,6 +458,8 @@ class MainWindow(QMainWindow):
     @pyqtSlot(QModelIndex, QModelIndex)
     def lineSelection_currentRowChanged(self, current, previous):
         if not self.previewHasReady:
+            return
+        if not current.isValid():
             return
         node = current.internalPointer()
         if node.ctx.bg_img:

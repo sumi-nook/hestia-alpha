@@ -3,6 +3,7 @@
 from __future__ import division
 
 from qt import pyqtSignal
+from qt import Qt
 from qt import QMainWindow
 from qt import QSize
 
@@ -12,6 +13,8 @@ from ui.glwindow import Ui_GLWindow
 class GLWindow(QMainWindow):
 
     ready = pyqtSignal()
+    next = pyqtSignal()
+    prev = pyqtSignal()
 
     def __init__(self, parent=None):
         super(GLWindow, self).__init__(parent)
@@ -19,6 +22,21 @@ class GLWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.ui.openGLWidget.ready.connect(self.ready)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.next.emit()
+        else:
+            super(GLWindow, self).mouseReleaseEvent(event)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key in [Qt.Key_Return, Qt.Key_Enter, Qt.Key_Down]:
+            self.next.emit()
+        elif key in [Qt.Key_Up]:
+            self.prev.emit()
+        else:
+            super(GLWindow, self).keyPressEvent(event)
 
     def context(self):
         return self.ui.openGLWidget.context()
