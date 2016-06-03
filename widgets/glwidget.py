@@ -6,6 +6,7 @@ from OpenGL.WGL import *
 
 from qt import pyqtSlot
 from qt import pyqtSignal
+from qt import Qt
 from qt import QGLWidget
 
 from gl.context import DrawContext
@@ -21,12 +22,19 @@ from gl.base import Rect
 class OpenGLWidget(QGLWidget):
 
     ready = pyqtSignal(DrawContext)
+    clicked = pyqtSignal()
 
     def __init__(self, parent=None):
         super(OpenGLWidget, self).__init__(parent)
         self.initialized = False
         self.objects = []
         self.ctx = DrawContext()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit()
+        else:
+            super(GLWindow, self).mouseReleaseEvent(event)
 
     def initializeGL(self):
         if not self.initialized:

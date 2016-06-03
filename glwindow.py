@@ -22,12 +22,7 @@ class GLWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.ui.openGLWidget.ready.connect(self.ready)
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.next.emit()
-        else:
-            super(GLWindow, self).mouseReleaseEvent(event)
+        self.ui.openGLWidget.clicked.connect(self.next)
 
     def keyPressEvent(self, event):
         key = event.key()
