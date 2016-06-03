@@ -10,6 +10,7 @@ from qt import QModelIndex
 from qt import QAbstractItemModel
 
 from archive.container import Scenario
+from archive.container import Image
 
 class TreeItem(object):
     def __init__(self, parent, name):
@@ -66,9 +67,10 @@ def make_project_tree(project):
                 tmp = DirectoryItem(parent, dirname)
                 parent.append(tmp)
                 parent = tmp
+                dirs[path] = tmp
             else:
                 parent = dirs[path]
-        if isinstance(container, Scenario):
+        if isinstance(container, (Scenario, Image)):
             parent.append(FileItem(parent, tail, container))
     return root
 

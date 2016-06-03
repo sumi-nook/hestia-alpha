@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import enum
 import os
 
 import six
@@ -21,6 +22,11 @@ class DummyFileObject(object):
         return self._content
 
 
+class ContainerType(enum.Enum):
+    Scenario = 1
+    Image = 2
+
+
 class ContainerBase(QObject):
 
     changed = pyqtSignal(object)
@@ -36,6 +42,12 @@ class ContainerBase(QObject):
     def archive(self, archive):
         """
         :type archive: zipfile.ZipFile
+        """
+        raise NotImplementedError
+
+    def type(self):
+        """
+        :rtype: ContainerType
         """
         raise NotImplementedError
 
@@ -73,6 +85,9 @@ class Scenario(ContainerBase):
         """
         assert(self.filepath is not None)
         archive.writestr(self.filePath(), self._content)
+
+    def type(self):
+        return ContainerType.Scenario
 
     def isSame(self, text):
         """
@@ -117,6 +132,9 @@ class Image(ContainerBase):
         """
         assert(self.filepath is not None)
         archive.writestr(self.filePath(), self.content())
+
+    def type(self):
+        return ContainerType.Image
 
 
 EXT_MAP = {

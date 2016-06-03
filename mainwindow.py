@@ -25,6 +25,7 @@ from qt import QMessageBox
 from qt import QItemSelectionModel
 
 from archive.file import ProjectFile
+from archive.container import ContainerType
 from archive.container import Scenario
 from models.project import ProjectTreeModel
 from models.project import FileItem
@@ -375,6 +376,8 @@ class MainWindow(QMainWindow):
         if not isinstance(currentItem, FileItem):
             return
         if currentItem == previousItem:
+            return
+        if currentItem.object.type() != ContainerType.Scenario:
             return
         if currentItem.object == self.currentScenario:
             return
