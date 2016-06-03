@@ -49,6 +49,8 @@ class ProjectFile(QObject):
 
     def loadResource(self, path, test_exts=[]):
         path = os.path.normpath(path)
+        if os.sep == "\\":
+            path = path.replace("\\", "/")
         for name in self.fp.namelist():
             if name == path:
                 return self.fp.read(name)

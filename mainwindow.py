@@ -223,7 +223,6 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def previewWindow_ready(self):
-        self.previewHasReady = True
         # set default font
         if __debug__:
             path = os.path.join(os.path.dirname(__file__), DEFAULT_FONT)
@@ -244,6 +243,9 @@ class MainWindow(QMainWindow):
         # init double buffer
         self.doubleBufferObject = DoubleBufferObject()
         self.glWindow.setDoubleBufferObject(self.doubleBufferObject)
+
+        # set to ready
+        self.previewHasReady = True
 
     @pyqtSlot()
     def previewWindow_toNext(self):
