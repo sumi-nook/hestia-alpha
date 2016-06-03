@@ -15,6 +15,7 @@ import qt
 from qt import pyqtSlot, pyqtSignal
 from qt import Qt
 from qt import QCoreApplication
+from qt import QMetaObject
 from qt import QModelIndex
 from qt import QAction
 from qt import QMainWindow
@@ -95,6 +96,8 @@ class MainWindow(QMainWindow):
         self.doubleBufferObject = None
 
         self.initialize()
+
+        QMetaObject.invokeMethod(self.glWindow, "show")
 
     def initialize(self):
         self.project = ProjectFile.create()
@@ -429,6 +432,8 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(QModelIndex, QModelIndex)
     def lineSelection_currentRowChanged(self, current, previous):
+        if not self.previewHasReady:
+            return
         node = current.internalPointer()
         if node.ctx.bg_img:
             texture = self.doubleBufferObject.backBuffer().backgroundTexture()

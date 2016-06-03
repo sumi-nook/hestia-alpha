@@ -63,6 +63,18 @@
 <xsl:text>)</xsl:text>
 </xsl:template>
 
+<xsl:template match="img[@class='background']">
+<xsl:text>※背景：</xsl:text>
+<xsl:value-of select="@src"/>
+<xsl:if test="@alt and @alt!=''">
+<xsl:text>：</xsl:text>
+<xsl:value-of select="@alt"/>
+</xsl:if>
+<xsl:text>
+
+</xsl:text>
+</xsl:template>
+
 <xsl:template match="img">
 <xsl:text>![</xsl:text>
 <xsl:value-of select="@alt"/>

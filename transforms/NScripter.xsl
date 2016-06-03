@@ -64,4 +64,12 @@
 <xsl:text></xsl:text>
 </xsl:template>
 
+<xsl:template match="img[@class='background']">
+<xsl:text>bg "</xsl:text>
+<xsl:value-of select="@src"/>
+<xsl:text>", 1
+
+</xsl:text>
+</xsl:template>
+
 </xsl:stylesheet>

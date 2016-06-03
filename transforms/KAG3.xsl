@@ -87,4 +87,12 @@
 <xsl:text>]</xsl:text>
 </xsl:template>
 
+<xsl:template match="img[@class='background']">
+<xsl:text>[image storage="</xsl:text>
+<xsl:value-of select="@src"/>
+<xsl:text>" page=fore layer=base]
+
+</xsl:text>
+</xsl:template>
+
 </xsl:stylesheet>

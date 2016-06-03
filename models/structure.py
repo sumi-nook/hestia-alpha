@@ -90,7 +90,10 @@ class BackgroundImageNode(StructureNode):
     def data(self, role=Qt.DisplayRole):
         if role != Qt.DisplayRole:
             return QVariant()
-        return "※背景：{}".format(self.elem.attrib["src"])
+        alt = ""
+        if self.elem.attrib["alt"]:
+            alt = "：{}".format(self.elem.attrib["alt"])
+        return "※背景：{}{}".format(self.elem.attrib["src"], alt)
 
     @property
     def src(self):
@@ -111,19 +114,20 @@ def _parse(root):
     result = []
     ctx = StructureContext()
     for elem in root:
-        if elem.tag != "p":
+        if elem.tag not in ["p", "img"]:
             result.append(UnknownNode(elem, ctx))
             continue
         cls = elem.attrib.get("class", "")
-        if "speech" in cls:
-            result.append(SpeechNode(elem, ctx))
-        elif "description" in cls:
-            result.append(DescriptionNode(elem, ctx))
-        elif "comment" in cls:
-            result.append(CommentNode(elem, ctx))
-        elif "bg-image" in cls and len(elem) == 1 and elem[0].tag == "img":
+        if elem.tag == "p":
+            if "speech" in cls:
+                result.append(SpeechNode(elem, ctx))
+            elif "description" in cls:
+                result.append(DescriptionNode(elem, ctx))
+            elif "comment" in cls:
+                result.append(CommentNode(elem, ctx))
+        elif elem.tag == "img" and "background" in cls:
             ctx = StructureContext(ctx)
-            node = BackgroundImageNode(elem[0], ctx)
+            node = BackgroundImageNode(elem, ctx)
             ctx.bg_img = node
             result.append(node)
         else:
