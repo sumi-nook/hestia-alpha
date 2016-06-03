@@ -34,7 +34,7 @@ class OpenGLWidget(QGLWidget):
         if event.button() == Qt.LeftButton:
             self.clicked.emit()
         else:
-            super(GLWindow, self).mouseReleaseEvent(event)
+            super(OpenGLWidget, self).mouseReleaseEvent(event)
 
     def initializeGL(self):
         if not self.initialized:
